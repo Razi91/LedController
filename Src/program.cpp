@@ -41,14 +41,16 @@ extern "C" void run() {
 	//LL_USART_TransmitData8(USART1, '!');
 
 	USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 
 	while (1) {
 		//CDC_Transmit_FS((uint8_t*)"?", 1);
-		if (HAL_DMA_GetState(&hdma_spi1_tx) != HAL_DMA_STATE_BUSY) {
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+		if (HAL_DMA_GetState(&hdma_spi1_tx) == HAL_DMA_STATE_BUSY) {
+//			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 			continue;
 		}
 		if (status.hasUpdate) {
+			LL_USART_TransmitData8(USART1,  '2');
 			LL_USART_DisableIT_RXNE(USART1);
 			copyPixelsToBuffer();
 			LL_USART_EnableIT_RXNE(USART1);
@@ -85,6 +87,7 @@ void addChar(uint8_t data) {
 	auto now = HAL_GetTick();
 	if (status.rxPos > 0 && now - status.lastRx > 2) {
 		status.rxPos = 0;
+	} else {
 	}
 	status.lastRx = now;
 	command.data[status.rxPos] = data;
@@ -107,6 +110,7 @@ extern "C" void rxHandle() {
 	}
 	if (LL_USART_IsActiveFlag_RXNE(USART1)) {
 		uint8_t data = LL_USART_ReceiveData8(USART1);
+		return;
 		addChar(data);
 	}
 }

@@ -3,7 +3,7 @@
 extern "C" {
 #endif
 
-#define PIXELS 120
+#define PIXELS 150
 
 void rxHandle();
 
@@ -23,9 +23,12 @@ typedef struct Status {
 extern Status status;
 
 typedef union Command {
-	uint8_t data[PIXELS * 3 + 1];
+	uint8_t data[PIXELS * 3 + 3 + 2 + 1];
 	struct {
-		uint8_t pixels;
+		char magic[3];
+		uint8_t pixels_hi;
+		uint8_t pixels_lo;
+		uint8_t checksum;
 		ws2812b_color colors[PIXELS];
 	};
 }__attribute__((packed)) Command;
